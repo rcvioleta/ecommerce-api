@@ -6,9 +6,15 @@ use App\Model\Review;
 use Illuminate\Http\Request;
 use App\Model\Product;
 use App\Http\Resources\ReviewResource;
+use App\Http\Requests\ReviewRequest;
+use Symfony\Component\HttpFoundation\Response;
 
 class ReviewController extends Controller
 {
+  public function __construct()
+  {
+    $this->middleware('auth:api')->except('index');
+  }
   /**
    * Display a listing of the resource.
    *
@@ -35,9 +41,15 @@ class ReviewController extends Controller
    * @param  \Illuminate\Http\Request  $request
    * @return \Illuminate\Http\Response
    */
-  public function store(Request $request)
+  public function store(ReviewRequest $request, Product $product)
   {
-    //
+    $request['review'] = $request->body;
+    unset($request['body']);
+    $review = new Review($request->all());
+    $product->reviews()->save($review);
+    return response()->json([
+      'data' => new ReviewResource($review)
+    ], Response::HTTP_OK);
   }
 
   /**
