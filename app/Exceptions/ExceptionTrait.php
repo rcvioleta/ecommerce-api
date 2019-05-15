@@ -8,29 +8,31 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 trait ExceptionTrait
 {
-    public function apiException($exception)
-    {
-        if ($this->isModelException($exception)) {
-            return $this->errorResponse('Product not found');
-        }
-
-        if ($this->isHttpException($exception)) {
-            return $this->errorResponse('Incorrect route');
-        }
+  public function apiException($request, $exception)
+  {
+    if ($this->isModelException($exception)) {
+      return $this->errorResponse('Product not found');
     }
 
-    protected function isModelException($exception)
-    {
-        return $exception instanceof ModelNotFoundException;
+    if ($this->isHttpException($exception)) {
+      return $this->errorResponse('Incorrect route');
     }
 
-    protected function isHttpException($exception)
-    {
-        return $exception instanceof NotFoundHttpException;
-    }
+    return parent::render($request, $exception);
+  }
 
-    protected function errorResponse($message)
-    {
-        return response()->json(["errors" => $message], Response::HTTP_NOT_FOUND);
-    }
+  protected function isModelException($exception)
+  {
+    return $exception instanceof ModelNotFoundException;
+  }
+
+  protected function isHttpException($exception)
+  {
+    return $exception instanceof NotFoundHttpException;
+  }
+
+  protected function errorResponse($message)
+  {
+    return response()->json(["errors" => $message], Response::HTTP_NOT_FOUND);
+  }
 }
